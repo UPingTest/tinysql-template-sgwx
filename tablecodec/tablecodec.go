@@ -16,6 +16,7 @@ package tablecodec
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"math"
 	"time"
 
@@ -39,7 +40,7 @@ var (
 const (
 	idLen     = 8
 	prefixLen = 1 + idLen /*tableID*/ + 2
-	// RecordRowKeyLen is public for calculating avgerage row size.
+	// RecordRowKeyLen is public for calculating average row size.
 	RecordRowKeyLen       = prefixLen + idLen /*handle*/
 	tablePrefixLength     = 1
 	recordPrefixSepLength = 2
@@ -63,15 +64,42 @@ func appendTableRecordPrefix(buf []byte, tableID int64) []byte {
 
 // EncodeRowKeyWithHandle encodes the table id, row handle into a kv.Key
 func EncodeRowKeyWithHandle(tableID int64, handle int64) kv.Key {
-	buf := make([]byte, 0, RecordRowKeyLen)
-	buf = appendTableRecordPrefix(buf, tableID)
-	buf = codec.EncodeInt(buf, handle)
+	buf := make([]byte, 0, RecordRowKeyLen)     // [19]byte
+	buf = appendTableRecordPrefix(buf, tableID) // t[tableId]_r
+	buf = codec.EncodeInt(buf, handle)          // t[tableId]_r[handle]
 	return buf
 }
 
 // DecodeRecordKey decodes the key and gets the tableID, handle.
 func DecodeRecordKey(key kv.Key) (tableID int64, handle int64, err error) {
 	/* Your code here */
+	fmt.Println(key)
+	if !key.HasPrefix(tablePrefix) {
+		return 0, 0, errors.New("error")
+	}
+	key = key[tablePrefixLength:]
+	key, tableID, err = codec.DecodeInt(key) // b 是还没解码的部分
+	if err != nil {
+		return 0, 0, errors.Trace(err)
+	}
+
+	if !key.HasPrefix(recordPrefixSep) {
+		return 0, 0, errors.New("error")
+	}
+
+	fmt.Println("key = ", key, "   and tableID = ", tableID)
+	key = key[recordPrefixSepLength:]
+
+	key, handle, err = codec.DecodeInt(key)
+
+	fmt.Println("key = ", key, "   and handle= ", handle)
+	//b = b[:len(b)-recordPrefixSepLength]
+
+	//	b, tableID, err = codec.DecodeInt(b)
+	if err != nil {
+		return 0, 0, errors.Trace(err)
+	}
+	//fmt.Printf(val, err)
 	return
 }
 
@@ -95,6 +123,23 @@ func EncodeIndexSeekKey(tableID int64, idxID int64, encodedValue []byte) kv.Key 
 // DecodeIndexKeyPrefix decodes the key and gets the tableID, indexID, indexValues.
 func DecodeIndexKeyPrefix(key kv.Key) (tableID int64, indexID int64, indexValues []byte, err error) {
 	/* Your code here */
+	if !key.HasPrefix(tablePrefix) {
+		return 0, 0, []byte{0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2, 0x9a}, errors.New("error")
+	}
+	key = key[tablePrefixLength:]
+	key, tableID, err = codec.DecodeInt(key)
+
+	fmt.Println("get key = ", key, " tableID=", tableID)
+	if !key.HasPrefix(indexPrefixSep) {
+		return 0, 0, []byte{0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2, 0x9a}, errors.New("error")
+	}
+
+	key = key[len(indexPrefixSep):]
+
+	key, indexID, err = codec.DecodeInt(key)
+
+	indexValues = key
+	fmt.Println("get key = ", key, " indexID=", indexID, "  indexValues=", indexValues)
 	return tableID, indexID, indexValues, nil
 }
 
