@@ -16,7 +16,12 @@ package tablecodec
 import (
 	"bytes"
 	"encoding/binary"
+<<<<<<< HEAD
 	"fmt"
+=======
+
+	// "fmt"
+>>>>>>> finished proj1-part2 test
 	"math"
 	"time"
 
@@ -72,8 +77,13 @@ func EncodeRowKeyWithHandle(tableID int64, handle int64) kv.Key {
 
 // DecodeRecordKey decodes the key and gets the tableID, handle.
 func DecodeRecordKey(key kv.Key) (tableID int64, handle int64, err error) {
+<<<<<<< HEAD
 	/* Your code here */
 	fmt.Println(key)
+=======
+
+	// fmt.Println(key)
+>>>>>>> finished proj1-part2 test
 	if !key.HasPrefix(tablePrefix) {
 		return 0, 0, errors.New("error")
 	}
@@ -87,12 +97,20 @@ func DecodeRecordKey(key kv.Key) (tableID int64, handle int64, err error) {
 		return 0, 0, errors.New("error")
 	}
 
+<<<<<<< HEAD
 	fmt.Println("key = ", key, "   and tableID = ", tableID)
+=======
+	// fmt.Println("key = ", key, "   and tableID = ", tableID)
+>>>>>>> finished proj1-part2 test
 	key = key[recordPrefixSepLength:]
 
 	key, handle, err = codec.DecodeInt(key)
 
+<<<<<<< HEAD
 	fmt.Println("key = ", key, "   and handle= ", handle)
+=======
+	// fmt.Println("key = ", key, "   and handle= ", handle)
+>>>>>>> finished proj1-part2 test
 	//b = b[:len(b)-recordPrefixSepLength]
 
 	//	b, tableID, err = codec.DecodeInt(b)
@@ -122,14 +140,22 @@ func EncodeIndexSeekKey(tableID int64, idxID int64, encodedValue []byte) kv.Key 
 
 // DecodeIndexKeyPrefix decodes the key and gets the tableID, indexID, indexValues.
 func DecodeIndexKeyPrefix(key kv.Key) (tableID int64, indexID int64, indexValues []byte, err error) {
+<<<<<<< HEAD
 	/* Your code here */
+=======
+
+>>>>>>> finished proj1-part2 test
 	if !key.HasPrefix(tablePrefix) {
 		return 0, 0, []byte{0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2, 0x9a}, errors.New("error")
 	}
 	key = key[tablePrefixLength:]
 	key, tableID, err = codec.DecodeInt(key)
 
+<<<<<<< HEAD
 	fmt.Println("get key = ", key, " tableID=", tableID)
+=======
+	// fmt.Println("get key = ", key, " tableID=", tableID)
+>>>>>>> finished proj1-part2 test
 	if !key.HasPrefix(indexPrefixSep) {
 		return 0, 0, []byte{0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2, 0x9a}, errors.New("error")
 	}
@@ -139,7 +165,11 @@ func DecodeIndexKeyPrefix(key kv.Key) (tableID int64, indexID int64, indexValues
 	key, indexID, err = codec.DecodeInt(key)
 
 	indexValues = key
+<<<<<<< HEAD
 	fmt.Println("get key = ", key, " indexID=", indexID, "  indexValues=", indexValues)
+=======
+	// fmt.Println("get key = ", key, " indexID=", indexID, "  indexValues=", indexValues)
+>>>>>>> finished proj1-part2 test
 	return tableID, indexID, indexValues, nil
 }
 
